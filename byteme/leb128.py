@@ -6,19 +6,40 @@ http://en.wikipedia.org/wiki/LEB128
 
 
 def leb128_encode(value, signed=False):
+    if not signed and value < 0:
+        raise ValueError("Value cannot be negative.")
+
     buf = bytearray()
+    more = True
 
-    if signed:
-        raise NotImplementedError()
+    while more:
 
-    else:
-        if value < 0:
-            raise ValueError("Value cannot be negative.")
+        # Obtain the lowest 7 bits, and shift the remainder.
+        byte = value & 0x7f
+        value >>= 7
 
-        while value > 0x7f:
-            buf.append((value & 0x7f) | 0x80)
-            value >>= 7
-        buf.append(value)
+        # For signed numbers, use sign extension to ensure that the
+        # MSB is 0 for positive numbers, and 1 for negative numbers.
+        if signed:
+            if value == 0 and byte & 0x40 == 0:
+                # Last byte for positive number
+                more = False
+            elif value == -1 and byte & 0x40:
+                # Last byte for negative number
+                more = False
+            else:
+                # Not done yet
+                byte |= 0x80
+
+        # Unsigned numbers do not have a sign bit.
+        else:
+            if value:
+                # Not done yet
+                byte |= 0x80
+            else:
+                more = False
+
+        buf.append(byte)
 
     return bytes(buf)
 
@@ -45,23 +66,32 @@ def test_leb128():
 
     test_vectors = [
         # From https://github.com/Medium/leb
-        ('10', 0x10),
-        ('45', 0x45),
-        ('8e 32', 0x190e),
-        ('c1 57', 0x2bc1),
-        ('80 80 80 3f', 0x7e00000),
-        ('80 80 80 4f', 0x9e00000),
+        ('10', 0x10, 0x10),
+        ('45', 0x45, -0x3b),
+        ('8e 32', 0x190e, 0x190e),
+        ('c1 57', 0x2bc1, -0x143f),
+        ('80 80 80 3f', 0x7e00000, 0x7e00000),
+        ('80 80 80 4f', 0x9e00000, -0x6200000),
 
         # From http://en.wikipedia.org/wiki/LEB128
-        ('e5 8e 26', 624485),
+        ('e5 8e 26', 624485, None),
+        ('9b f1 59', None, -624485),
     ]
 
-    for s, n in test_vectors:
+    for s, positive, negative in test_vectors:
         b = bytes.fromhex(s)
 
-        assert leb128_encode(n) == b
-        decoded, size = leb128_decode(b)
-        assert decoded == n
+        if positive is not None:
+            assert leb128_encode(positive) == b
+            decoded, size = leb128_decode(b)
+            assert decoded == positive
+            assert len(b) == size
+
+        if negative is not None:
+            assert leb128_encode(negative, signed=True) == b
+            # decoded, size = leb128_decode(b, signed=True)
+            # assert decoded == negative
+            # assert len(b) == size
 
     # It should ignore trailing bytes after the terminating byte
     assert leb128_decode(b'\xe5\x8e\x26\xab\xab\xab') == (624485, 3)

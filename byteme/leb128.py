@@ -24,7 +24,21 @@ def leb128_encode(value, signed=False):
 
 
 def leb128_decode(value, signed=False):
-    raise NotImplementedError()
+
+    decoded = 0
+
+    if signed:
+        size = 0  # FIXME:
+        raise NotImplementedError()
+    else:
+        shift = 0
+        for size, byte in enumerate(value, 1):
+            decoded |= (byte & 0x7f) << shift
+            shift += 7
+            if byte & 0x80 == 0:
+                break
+
+    return decoded, size
 
 
 def test_leb128():
@@ -46,4 +60,8 @@ def test_leb128():
         b = bytes.fromhex(s)
 
         assert leb128_encode(n) == b
-        # assert leb128_decode(b) == n
+        decoded, size = leb128_decode(b)
+        assert decoded == n
+
+    # It should ignore trailing bytes after the terminating byte
+    assert leb128_decode(b'\xe5\x8e\x26\xab\xab\xab') == (624485, 3)

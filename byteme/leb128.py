@@ -12,12 +12,12 @@ def leb128_encode(value, signed=False):
         raise NotImplementedError()
 
     else:
-        assert value >= 0
+        if value < 0:
+            raise ValueError("Value cannot be negative.")
 
         while value > 0x7f:
             buf.append((value & 0x7f) | 0x80)
             value >>= 7
-
         buf.append(value)
 
     return bytes(buf)

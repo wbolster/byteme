@@ -12,6 +12,9 @@ PY3 = sys.version_info[0] == 3
 
 if PY3:
     iterbytes = iter
+
 else:
-    def iterbytes(buf):
-        return (ord(byte) for byte in buf)
+    import functools
+    import itertools
+
+    iterbytes = functools.partial(itertools.imap, ord)

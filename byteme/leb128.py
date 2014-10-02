@@ -45,19 +45,18 @@ def leb128_encode(value, signed=False):
 
 
 def leb128_decode(value, signed=False):
-
     decoded = 0
+    shift = 0
 
-    if signed:
-        size = 0  # FIXME:
-        raise NotImplementedError()
-    else:
-        shift = 0
-        for size, byte in enumerate(value, 1):
-            decoded |= (byte & 0x7f) << shift
-            shift += 7
-            if byte & 0x80 == 0:
-                break
+    for size, byte in enumerate(value, 1):
+        decoded |= (byte & 0x7f) << shift
+        shift += 7
+        if byte & 0x80 == 0:
+            break
+
+    # Negative numbers have a sign bit in the last byte.
+    if signed and byte & 0x40:
+        decoded -= (1 << shift)
 
     return decoded, size
 
@@ -98,9 +97,9 @@ def test_leb128_known_values():
 
         if negative is not None:
             assert leb128_encode(negative, signed=True) == b
-            # decoded, size = leb128_decode(b, signed=True)
-            # assert decoded == negative
-            # assert len(b) == size
+            decoded, size = leb128_decode(b, signed=True)
+            assert decoded == negative
+            assert len(b) == size
 
 
 def test_leb128_roundtrip():
@@ -111,8 +110,8 @@ def test_leb128_roundtrip():
             assert decoded == i
 
         encoded = leb128_encode(i, signed=True)
-        # decoded, _ = leb128_decode(encoded, signed=True)
-        # assert decoded == i
+        decoded, _ = leb128_decode(encoded, signed=True)
+        assert decoded == i
 
 
 def test_leb128_trailing_bytes():

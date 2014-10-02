@@ -1,11 +1,20 @@
 """
 Module for encoding and decoding LEB128 values.
 
-http://en.wikipedia.org/wiki/LEB128
+See http://en.wikipedia.org/wiki/LEB128 for a description of the format.
 """
 
 
 def leb128_encode(value, signed=False):
+    """
+    Encode a number using LEB128 encoding.
+
+    :param int value: the value to encode
+    :param bool signed: whether to use a signed LEB128 representation
+    :return: encoded value
+    :rtype: bytes
+    """
+
     if not signed and value < 0:
         raise ValueError("Value cannot be negative.")
 
@@ -45,6 +54,15 @@ def leb128_encode(value, signed=False):
 
 
 def leb128_decode(value, signed=False):
+    """
+    Decode a number using LEB128 encoding.
+
+    :param bytes value: the value to decode
+    :param bool signed: whether to use a signed LEB128 representation
+    :return: decoded value
+    :rtype: int
+    """
+
     decoded = 0
     shift = 0
 

@@ -4,6 +4,8 @@ Module for encoding and decoding LEB128 values.
 See http://en.wikipedia.org/wiki/LEB128 for a description of the format.
 """
 
+from .compat import iterbytes
+
 
 def leb128_encode(value, signed=False):
     """
@@ -68,7 +70,7 @@ def leb128_decode(value, signed=False, max=None):
     decoded = 0
     shift = 0
 
-    for size, byte in enumerate(value, 1):
+    for size, byte in enumerate(iterbytes(value), 1):
         decoded |= (byte & 0x7f) << shift
         shift += 7
         if byte & 0x80 == 0:

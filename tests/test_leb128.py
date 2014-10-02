@@ -1,4 +1,6 @@
 
+import binascii
+
 import pytest
 
 from byteme import leb128_encode, leb128_decode
@@ -25,11 +27,11 @@ def test_leb128_known_values():
         # From http://events.linuxfoundation.org/sites/events/
         #      files/slides/ABS2014.pdf
         ('7f', 127, -1),
-        ('807f', 16256, -128),
+        ('80 7f', 16256, -128),
     ]
 
     for s, positive, negative in test_vectors:
-        b = bytes.fromhex(s)
+        b = binascii.unhexlify(s.replace(' ', ''))
 
         if positive is not None:
             assert leb128_encode(positive) == b

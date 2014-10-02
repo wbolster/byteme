@@ -59,8 +59,8 @@ def leb128_decode(value, signed=False):
 
     :param bytes value: the value to decode
     :param bool signed: whether to use a signed LEB128 representation
-    :return: decoded value
-    :rtype: int
+    :return: decoded value and the number of bytes processed
+    :rtype: `(int, int)` tuple
     """
 
     decoded = 0

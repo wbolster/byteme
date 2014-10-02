@@ -1,4 +1,6 @@
 
+import pytest
+
 from byteme import leb128_encode, leb128_decode
 
 
@@ -19,7 +21,6 @@ def test_leb128_known_values():
         # From http://en.wikipedia.org/wiki/LEB128
         ('e5 8e 26', 624485, None),
         ('9b f1 59', None, -624485),
-
 
         # From http://events.linuxfoundation.org/sites/events/
         #      files/slides/ABS2014.pdf
@@ -58,3 +59,12 @@ def test_leb128_roundtrip():
 def test_leb128_trailing_bytes():
     # It should ignore trailing bytes after the terminating byte
     assert leb128_decode(b'\xe5\x8e\x26\xab\xab\xab') == (624485, 3)
+
+
+def test_leb128_limits():
+
+    with pytest.raises(ValueError):
+        leb128_decode(b'\x8e\x32', max=1)
+
+    with pytest.raises(ValueError):
+        leb128_decode(b'\x9b\xf1\x59', signed=True, max=2)

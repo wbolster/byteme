@@ -53,12 +53,14 @@ def leb128_encode(value, signed=False):
     return bytes(buf)
 
 
-def leb128_decode(value, signed=False):
+def leb128_decode(value, signed=False, max=None):
     """
     Decode a number using LEB128 encoding.
 
     :param bytes value: the value to decode
     :param bool signed: whether to use a signed LEB128 representation
+    :param int max: maximum number of bytes the encoded value may have
+                    (optional)
     :return: decoded value and the number of bytes processed
     :rtype: `(int, int)` tuple
     """
@@ -71,6 +73,10 @@ def leb128_decode(value, signed=False):
         shift += 7
         if byte & 0x80 == 0:
             break
+
+        if max == size:  # this also works if max=None
+            msg = "encoded value seems to be >{:d} bytes"
+            raise ValueError(msg.format(size))
 
     # Negative numbers have a sign bit in the last byte.
     if signed and byte & 0x40:

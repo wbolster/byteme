@@ -7,7 +7,7 @@ See http://en.wikipedia.org/wiki/LEB128 for a description of the format.
 from .compat import iterbytes
 
 
-def leb128_encode(value, signed=False):
+def leb128_dumps(value, signed=False):
     """
     Encode a number using LEB128 encoding.
 
@@ -55,7 +55,7 @@ def leb128_encode(value, signed=False):
     return bytes(buf)
 
 
-def leb128_decode(value, signed=False, max=None):
+def leb128_loads(value, signed=False, max=None):
     """
     Decode a number using LEB128 encoding.
 

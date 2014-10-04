@@ -3,7 +3,7 @@ import binascii
 
 import pytest
 
-from byteme import leb128_encode, leb128_decode
+from byteme import leb128_dumps, leb128_loads
 
 
 def test_leb128_known_values():
@@ -34,14 +34,14 @@ def test_leb128_known_values():
         b = binascii.unhexlify(s.replace(' ', ''))
 
         if positive is not None:
-            assert leb128_encode(positive) == b
-            decoded, size = leb128_decode(b)
+            assert leb128_dumps(positive) == b
+            decoded, size = leb128_loads(b)
             assert decoded == positive
             assert len(b) == size
 
         if negative is not None:
-            assert leb128_encode(negative, signed=True) == b
-            decoded, size = leb128_decode(b, signed=True)
+            assert leb128_dumps(negative, signed=True) == b
+            decoded, size = leb128_loads(b, signed=True)
             assert decoded == negative
             assert len(b) == size
 
@@ -49,24 +49,24 @@ def test_leb128_known_values():
 def test_leb128_roundtrip():
     for i in range(-123456789, 123456789, 100000):
         if i >= 0:
-            encoded = leb128_encode(i)
-            decoded, _ = leb128_decode(encoded)
+            encoded = leb128_dumps(i)
+            decoded, _ = leb128_loads(encoded)
             assert decoded == i
 
-        encoded = leb128_encode(i, signed=True)
-        decoded, _ = leb128_decode(encoded, signed=True)
+        encoded = leb128_dumps(i, signed=True)
+        decoded, _ = leb128_loads(encoded, signed=True)
         assert decoded == i
 
 
 def test_leb128_trailing_bytes():
     # It should ignore trailing bytes after the terminating byte
-    assert leb128_decode(b'\xe5\x8e\x26\xab\xab\xab') == (624485, 3)
+    assert leb128_loads(b'\xe5\x8e\x26\xab\xab\xab') == (624485, 3)
 
 
 def test_leb128_limits():
 
     with pytest.raises(ValueError):
-        leb128_decode(b'\x8e\x32', max=1)
+        leb128_loads(b'\x8e\x32', max=1)
 
     with pytest.raises(ValueError):
-        leb128_decode(b'\x9b\xf1\x59', signed=True, max=2)
+        leb128_loads(b'\x9b\xf1\x59', signed=True, max=2)

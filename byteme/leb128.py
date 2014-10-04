@@ -4,7 +4,7 @@ Module for encoding and decoding LEB128 values.
 See http://en.wikipedia.org/wiki/LEB128 for a description of the format.
 """
 
-from .compat import iterbytes
+from .compat import iterbytes, map
 
 
 def leb128_dumps(value, signed=False):
@@ -55,22 +55,18 @@ def leb128_dumps(value, signed=False):
     return bytes(buf)
 
 
-def leb128_loads(value, signed=False, max=None):
-    """
-    Decode a number using LEB128 encoding.
+def leb128_dump(value, fp, signed=False, max=None):
+    """Like leb128_dump(), but writes to a file-like object."""
+    fp.write(leb128_dumps(value, signed=signed))
 
-    :param bytes value: the value to decode
-    :param bool signed: whether to use a signed LEB128 representation
-    :param int max: maximum number of bytes the encoded value may have
-                    (optional)
-    :return: decoded value and the number of bytes processed
-    :rtype: `(int, int)` tuple
-    """
 
+def _leb128_load(iterable, signed=False, max=None):
+    """Internal LEB128 decoding routine"""
     decoded = 0
     shift = 0
 
-    for size, byte in enumerate(iterbytes(value), 1):
+    # The 'iterable' must yield int values
+    for size, byte in enumerate(iterable, 1):
         decoded |= (byte & 0x7f) << shift
         shift += 7
         if byte & 0x80 == 0:
@@ -85,3 +81,23 @@ def leb128_loads(value, signed=False, max=None):
         decoded -= (1 << shift)
 
     return decoded, size
+
+
+def leb128_loads(value, signed=False, max=None):
+    """
+    Decode a number using LEB128 encoding.
+
+    :param bytes value: the value to decode
+    :param bool signed: whether to use a signed LEB128 representation
+    :param int max: maximum number of bytes the encoded value may have
+                    (optional)
+    :return: decoded value and the number of bytes processed
+    :rtype: `(int, int)` tuple
+    """
+    return _leb128_load(iterbytes(value), signed=signed, max=max)
+
+
+def leb128_load(fp, signed=False, max=None):
+    """Like leb128_loads(), but reads from a file-like object."""
+    single_bytes_reader = iter(lambda: fp.read(1), b'')
+    return _leb128_load(map(ord, single_bytes_reader), signed=signed, max=max)

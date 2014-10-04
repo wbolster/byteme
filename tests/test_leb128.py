@@ -75,10 +75,15 @@ def test_leb128_limits():
 
 def test_leb128_file_like():
     fp = io.BytesIO(b'\x80\x7fabc')
-    value, size = byteme.leb128_load(fp, signed=True)
+    value = byteme.leb128_load(fp, signed=True)
     assert value == -128
-    assert size == 2
     assert fp.read() == b'abc'
+
+    res = byteme.leb128_load(
+        io.BytesIO(b'\x80\x7f'),
+        signed=True,
+        only_value=False)
+    assert res == (-128, 2)
 
     fp = io.BytesIO()
     byteme.leb128_dump(-128, fp, signed=True)

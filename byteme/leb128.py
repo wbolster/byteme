@@ -97,7 +97,12 @@ def leb128_loads(value, signed=False, max=None):
     return _leb128_load(iterbytes(value), signed=signed, max=max)
 
 
-def leb128_load(fp, signed=False, max=None):
-    """Like leb128_loads(), but reads from a file-like object."""
-    single_bytes_reader = iter(lambda: fp.read(1), b'')
-    return _leb128_load(map(ord, single_bytes_reader), signed=signed, max=max)
+def leb128_load(fp, signed=False, max=None, only_value=True):
+    """
+    Like leb128_loads(), but reads from a file-like object.
+
+    This returns only the value, not the number of bytes read.
+    """
+    single_bytes_reader = map(ord, iter(lambda: fp.read(1), b''))
+    result = _leb128_load(single_bytes_reader, signed=signed, max=max)
+    return result[0] if only_value else result

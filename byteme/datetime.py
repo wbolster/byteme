@@ -2,6 +2,7 @@
 Date/time encoding routines.
 """
 
+import datetime
 import struct
 
 # http://dev.mysql.com/doc/internals/en/
@@ -37,7 +38,16 @@ def mysql_datetime_dump(value, fp):
 
 
 def mysql_datetime_loads(value):
-    raise NotImplementedError()
+    high, low = struct.unpack('>BL', value)
+    value = (high << 32) | low
+    year, month = divmod((value >> 22) & 0x1ffff, 13)
+    return datetime.datetime(
+        year,
+        month,
+        (value >> 17) & 0b00011111,  # day
+        (value >> 12) & 0b00011111,  # hour
+        (value >> 6) & 0b00111111,  # minute
+        value & 0b00111111)  # second
 
 
 def mysql_datetime_load(value, fp):

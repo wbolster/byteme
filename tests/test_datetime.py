@@ -1,7 +1,7 @@
 
 import datetime
 
-from byteme.datetime import mysql_datetime_dumps
+from byteme.datetime import mysql_datetime_dumps, mysql_datetime_loads
 
 
 def test_datetime():
@@ -10,6 +10,7 @@ def test_datetime():
     # Sign, year (includes month), day, hour, minute, second:
     #          SYYYYYYY    YYYYYYYY    YYDDDDDH    HHHHMMMM    MMSSSSSS
     parts = [0b10011001, 0b10010100, 0b00001010, 0b00010000, 0b10000011]
-    expected = bytes(bytearray(parts))
-    actual = mysql_datetime_dumps(dt)
-    assert actual == expected
+    as_bytes = bytes(bytearray(parts))
+
+    assert mysql_datetime_dumps(dt) == as_bytes
+    assert mysql_datetime_loads(as_bytes) == dt

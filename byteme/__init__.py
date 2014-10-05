@@ -10,3 +10,10 @@ from .leb128 import (  # noqa
     leb128_load,
     leb128_loads,
 )
+
+from .datetime import (  # noqa
+    mysql_datetime_dump,
+    mysql_datetime_dumps,
+    mysql_datetime_load,
+    mysql_datetime_loads,
+)

@@ -2,6 +2,8 @@
 Date/time encoding routines.
 """
 
+import struct
+
 # http://dev.mysql.com/doc/internals/en/
 #    date-and-time-data-type-representation.html
 #
@@ -19,8 +21,15 @@ Date/time encoding routines.
 #       built-in datetime module doesn't support it :(
 
 
-def mysql_datetime_dumps(value):
-    raise NotImplementedError()
+def mysql_datetime_dumps(dt):
+
+    n = ((1 << 39)  # sign bit
+         + ((dt.year * 13 + dt.month) << 22)
+         + (dt.day << 17)
+         + (dt.hour << 12)
+         + (dt.minute << 6)
+         + dt.second)
+    return struct.pack('>Q', n)[-5:]
 
 
 def mysql_datetime_dump(value, fp):

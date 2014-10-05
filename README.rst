@@ -10,8 +10,8 @@ byte strings.
 Currently implemented:
 
 * LEB128
+* Date/time packing in MySQL's internal format
 
 Ideas:
 
 * varint
-* mysql datetime packing

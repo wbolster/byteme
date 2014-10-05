@@ -15,6 +15,8 @@ Date/time encoding routines.
 # 40 bits = 5 bytes
 #
 # TODO: microseconds= arg, use 8 bytes instead of 5 in that case
+# TODO: support for partial dates (e.g. month=0) gracefully, but
+#       built-in datetime module doesn't support it :(
 
 
 def mysql_datetime_dumps(value):

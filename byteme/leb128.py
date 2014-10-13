@@ -4,6 +4,8 @@ Module for encoding and decoding LEB128 values.
 See http://en.wikipedia.org/wiki/LEB128 for a description of the format.
 """
 
+import functools
+
 from .compat import iterbytes, map
 
 
@@ -103,6 +105,6 @@ def leb128_load(fp, signed=False, max=None, only_value=True):
 
     This returns only the value, not the number of bytes read.
     """
-    single_bytes_reader = map(ord, iter(lambda: fp.read(1), b''))
+    single_bytes_reader = map(ord, iter(functools.partial(fp.read, 1), b''))
     result = _leb128_load(single_bytes_reader, signed=signed, max=max)
     return result[0] if only_value else result

@@ -52,6 +52,6 @@ def mysql_datetime_loads(value):
         value & 0b00111111)  # second
 
 
-def mysql_datetime_load(value, fp):
+def mysql_datetime_load(fp):
     # TODO: handle partial reads
     return mysql_datetime_loads(fp.read(5))

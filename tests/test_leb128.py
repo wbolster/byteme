@@ -73,6 +73,11 @@ def test_leb128_limits():
         byteme.leb128_loads(b'\x9b\xf1\x59', signed=True, max=2)
 
 
+def test_leb128_truncated():
+    with pytest.raises(ValueError):
+        byteme.leb128_loads(b'\x80')
+
+
 def test_leb128_file_like():
     fp = io.BytesIO(b'\x80\x7fabc')
     value = byteme.leb128_load(fp, signed=True)

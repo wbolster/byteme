@@ -78,6 +78,10 @@ def _leb128_load(iterable, signed=False, max=None):
             msg = "encoded value seems to be >{:d} bytes"
             raise ValueError(msg.format(size))
 
+    else:
+        # Reached when no 'break' was issued in the loop above.
+        raise ValueError("truncated value after {:d} bytes".format(size))
+
     # Negative numbers have a sign bit in the last byte.
     if signed and byte & 0x40:
         decoded -= (1 << shift)

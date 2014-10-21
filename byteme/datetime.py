@@ -53,5 +53,4 @@ def mysql_datetime_loads(value):
 
 
 def mysql_datetime_load(fp):
-    # TODO: handle partial reads
     return mysql_datetime_loads(fp.read(5))

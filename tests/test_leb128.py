@@ -77,6 +77,9 @@ def test_leb128_truncated():
     with pytest.raises(ValueError):
         byteme.leb128_loads(b'\x80')
 
+    with pytest.raises(ValueError):
+        byteme.leb128_loads(b'')
+
 
 def test_leb128_file_like():
     fp = io.BytesIO(b'\x80\x7fabc')

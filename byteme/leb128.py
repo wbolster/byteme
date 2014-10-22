@@ -68,6 +68,7 @@ def _leb128_load(iterable, signed=False, max=None):
     shift = 0
 
     # The 'iterable' must yield int values
+    size = 0
     for size, byte in enumerate(iterable, 1):
         decoded |= (byte & 0x7f) << shift
         shift += 7
